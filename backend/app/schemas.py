@@ -126,3 +126,22 @@ class PaymentRead(PaymentBase):
 
     class Config:
         orm_mode = True
+
+
+class ListingPhotoBase(BaseModel):
+    cloudinary_public_id: str
+    url: str
+    sort_order: Optional[int] = 0
+
+
+class ListingPhotoCreate(ListingPhotoBase):
+    listing_id: int
+
+
+class ListingPhotoRead(ListingPhotoBase):
+    id: int
+    listing_id: int
+    created_at: datetime
+
+    class Config:
+        orm_mode = True

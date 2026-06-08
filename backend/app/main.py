@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .database import engine
 from .models import Base
-from .routers import listings, realtors, subscriptions
+from .routers import listings, listing_photos, payments, realtors, subscriptions
 
 
 @asynccontextmanager
@@ -30,3 +30,5 @@ app.add_middleware(
 app.include_router(realtors.router, prefix="/realtors", tags=["realtors"])
 app.include_router(subscriptions.router, prefix="/subscriptions", tags=["subscriptions"])
 app.include_router(listings.router, prefix="/listings", tags=["listings"])
+app.include_router(listing_photos.router, tags=["listing_photos"])
+app.include_router(payments.router, prefix="/payments", tags=["payments"])
