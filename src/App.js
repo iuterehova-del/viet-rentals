@@ -7,22 +7,9 @@ function App() {
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedPrice, setSelectedPrice] = useState('');
   const [selectedRooms, setSelectedRooms] = useState('');
+  const [housings, setHousings] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
-
-  // 🔌 ПОДКЛЮЧЕНИЕ К TELEGRAM
-  useEffect(() => {
-    WebApp.ready();
-    WebApp.expand(); // Разворачиваем на весь экран
-
-    // Получаем данные пользователя из Telegram
-    if (WebApp.initDataUnsafe?.user) {
-      setUser(WebApp.initDataUnsafe.user);
-      // Если язык пользователя русский - ставим РУ
-      const lang = WebApp.initDataUnsafe.user.language_code;
-      if (lang === 'ru') setLanguage('ru');
-      else setLanguage('en');
-    }
-  }, []);
 
   const texts = {
     ru: {
@@ -34,6 +21,7 @@ function App() {
       contact: '📞 Контакт',
       save: '❤️ Сохранить',
       noResults: '😔 Ничего не найдено',
+      loading: '⏳ Загрузка...',
       month: '/мес',
       sqm: 'м²',
       hello: 'Привет',
@@ -47,6 +35,7 @@ function App() {
       contact: '📞 Contact',
       save: '❤️ Save',
       noResults: '😔 No results found',
+      loading: '⏳ Loading...',
       month: '/mo',
       sqm: 'm²',
       hello: 'Hello',
@@ -55,69 +44,37 @@ function App() {
 
   const t = texts[language];
 
-  const housings = [
-    {
-      id: 1,
-      title: { ru: '1-комнатная у пляжа', en: '1-bedroom near beach' },
-      price: 600,
-      city: 'Nha Trang',
-      district: { ru: 'Центр', en: 'City Center' },
-      rooms: 1,
-      square: 40,
-      phone: '+84912345678',
-      description: { ru: 'Уютная квартира с видом на море', en: 'Cozy apartment with sea view' },
-      image: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500'
-    },
-    {
-      id: 2,
-      title: { ru: '2-комнатная с кондиционером', en: '2-bedroom with AC' },
-      price: 900,
-      city: 'Nha Trang',
-      district: { ru: 'Кай Дьеу', en: 'Kai Dieu' },
-      rooms: 2,
-      square: 65,
-      phone: '+84987654321',
-      description: { ru: 'Современная квартира, всё включено', en: 'Modern apartment, all inclusive' },
-      image: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=500'
-    },
-    {
-      id: 3,
-      title: { ru: '3-комнатная вилла с бассейном', en: '3-bedroom villa with pool' },
-      price: 1500,
-      city: 'Da Nang',
-      district: { ru: 'Пригород', en: 'Suburbs' },
-      rooms: 3,
-      square: 120,
-      phone: '+84911111111',
-      description: { ru: 'Просторная вилла, свой бассейн', en: 'Spacious villa with private pool' },
-      image: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=500'
-    },
-    {
-      id: 4,
-      title: { ru: 'Студия эконом класс', en: 'Budget studio' },
-      price: 350,
-      city: 'Ho Chi Minh',
-      district: { ru: 'Район 1', en: 'District 1' },
-      rooms: 1,
-      square: 28,
-      phone: '+84922222222',
-      description: { ru: 'Недорогое жилье в центре города', en: 'Affordable housing in city center' },
-      image: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500'
-    },
-    {
-      id: 5,
-      title: { ru: '2-комнатная у моря', en: '2-bedroom sea view' },
-      price: 1100,
-      city: 'Da Nang',
-      district: { ru: 'Пляж Мидан', en: 'My Khe Beach' },
-      rooms: 2,
-      square: 70,
-      phone: '+84933333333',
-      description: { ru: 'Вид на море, 5 минут до пляжа', en: 'Sea view, 5 min to beach' },
-      image: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=500'
-    },
-  ];
+  // 🔌 ПОДКЛЮЧЕНИЕ К TELEGRAM
+  useEffect(() => {
+    WebApp.ready();
+    WebApp.expand();
+    if (WebApp.initDataUnsafe?.user) {
+      setUser(WebApp.initDataUnsafe.user);
+      const lang = WebApp.initDataUnsafe.user.language_code;
+      if (lang === 'ru') setLanguage('ru');
+      else setLanguage('en');
+    }
+  }, []);
 
+  // 📡 ЗАГРУЗКА ДАННЫХ ИЗ API
+  useEffect(() => {
+    const fetchListings = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch('http://localhost:8000/listings/public');
+        const data = await response.json();
+        setHousings(data);
+      } catch (error) {
+        console.error('Ошибка загрузки:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchListings();
+  }, []);
+
+  // 🔍 ФИЛЬТРАЦИЯ
   const filtered = housings.filter(h => {
     if (selectedCity && h.city !== selectedCity) return false;
     if (selectedPrice && h.price > parseInt(selectedPrice)) return false;
@@ -125,10 +82,8 @@ function App() {
     return true;
   });
 
-  // Показываем popup через Telegram
   const handleContact = (phone, name) => {
     if (WebApp.initDataUnsafe?.user) {
-      // Открываем через Telegram
       WebApp.showPopup({
         title: t.contact,
         message: `${name}\n📞 ${phone}`,
@@ -142,7 +97,6 @@ function App() {
         }
       });
     } else {
-      // В браузере (для теста)
       window.open(`tel:${phone}`);
     }
   };
@@ -206,25 +160,32 @@ function App() {
       </div>
 
       <div className="listings">
-        {filtered.length === 0 ? (
+        {loading ? (
+          <p className="empty">{t.loading}</p>
+        ) : filtered.length === 0 ? (
           <p className="empty">{t.noResults}</p>
         ) : (
           filtered.map(h => (
             <div key={h.id} className="card">
-              <img src={h.image} alt={h.title[language]} className="card-img" />
-              <div className="card-body">
-                <h2>{h.title[language]}</h2>
+<img
+  src={h.photos && h.photos.length > 0
+    ? h.photos[0].url
+    : 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&h=400&fit=crop'}
+  alt={h.title}
+  className="card-img"
+/>              <div className="card-body">
+                <h2>{h.title}</h2>
                 <div className="card-price">${h.price}<span>{t.month}</span></div>
                 <div className="card-details">
-                  <span>📍 {h.district[language]}</span>
-                  <span>🛏 {h.rooms}</span>
-                  <span>📐 {h.square}{t.sqm}</span>
+                  <span>📍 {h.district || h.city}</span>
+                  {h.rooms && <span>🛏 {h.rooms}</span>}
+                  {h.square && <span>📐 {h.square}{t.sqm}</span>}
                 </div>
-                <p className="card-desc">{h.description[language]}</p>
+                <p className="card-desc">{h.description}</p>
                 <div className="card-actions">
                   <button
                     className="btn-contact"
-                    onClick={() => handleContact(h.phone, h.title[language])}
+                    onClick={() => handleContact(h.phone, h.title)}
                   >
                     {t.contact}
                   </button>

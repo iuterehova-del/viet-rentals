@@ -87,11 +87,27 @@ class ListingUpdate(BaseModel):
     expires_at: Optional[datetime] = None
 
 
+class ListingPhotoBase(BaseModel):
+    cloudinary_public_id: str
+    url: str
+    sort_order: Optional[int] = 0
+
+
+class ListingPhotoRead(ListingPhotoBase):
+    id: int
+    listing_id: int
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
 class ListingRead(ListingBase):
     id: int
     realtor_id: int
     created_at: datetime
     updated_at: datetime
+    photos: list[ListingPhotoRead] = []
 
     class Config:
         orm_mode = True
@@ -129,19 +145,19 @@ class PaymentRead(PaymentBase):
 
 
 class ListingPhotoBase(BaseModel):
-    cloudinary_public_id: str
     url: str
     sort_order: Optional[int] = 0
-
 
 class ListingPhotoCreate(ListingPhotoBase):
     listing_id: int
 
+class ListingPhotoUpdate(BaseModel):
+    url: Optional[str] = None
+    sort_order: Optional[int] = None
 
 class ListingPhotoRead(ListingPhotoBase):
     id: int
     listing_id: int
-    created_at: datetime
 
     class Config:
         orm_mode = True

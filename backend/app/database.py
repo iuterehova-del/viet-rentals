@@ -1,22 +1,29 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, DeclarativeBase
 import urllib.parse
 
 from .config import settings
 
-# Support SQLite (local file) and PostgreSQL via DATABASE_URL
 DATABASE_URL = settings.database_url
 
 connect_args = {}
 if DATABASE_URL.startswith("sqlite"):
-    # SQLite needs this for use with SQLAlchemy in multithreaded apps
     connect_args = {"check_same_thread": False}
 
-engine = create_engine(DATABASE_URL, future=True, connect_args=connect_args)
+engine = create_engine(DATABASE_URL, connect_args=connect_args)
 
 SessionLocal = sessionmaker(
     bind=engine,
     autoflush=False,
     autocommit=False,
-    future=True,
 )
+
+class Base(DeclarativeBase):
+    pass
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
