@@ -61,7 +61,7 @@ function App() {
     const fetchListings = async () => {
       try {
         setLoading(true);
-        const response = await fetch('http://localhost:8000/listings/public');
+        const response = await fetch('https://viet-rentals-production.up.railway.app');
         const data = await response.json();
         setHousings(data);
       } catch (error) {
