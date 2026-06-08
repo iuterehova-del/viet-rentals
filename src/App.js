@@ -63,7 +63,7 @@ function App() {
         setLoading(true);
         const response = await fetch('https://viet-rentals-production.up.railway.app');
         const data = await response.json();
-        setHousings(data);
+        setHousings(Array.isArray(data) ? data : []);
       } catch (error) {
         console.error('Ошибка загрузки:', error);
       } finally {
