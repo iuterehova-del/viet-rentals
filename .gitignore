@@ -24,3 +24,11 @@ yarn-error.log*
 
 # Backend environment (local SQLite credentials)
 backend/.env
+
+# Python
+backend/venv/
+*.db
+.env
+backend/.env
+__pycache__/
+*.pyc
