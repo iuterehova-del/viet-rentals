@@ -1,10 +1,23 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
+from .database import engine
+from .models import Base
 from .routers import listings, realtors, subscriptions
 
-app = FastAPI(title="Viet Rentals API")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup logic
+    Base.metadata.create_all(bind=engine)
+    yield
+    # Shutdown logic (if needed)
+
+
+app = FastAPI(title="Viet Rentals API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
