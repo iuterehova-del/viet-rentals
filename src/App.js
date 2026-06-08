@@ -61,7 +61,7 @@ function App() {
     const fetchListings = async () => {
       try {
         setLoading(true);
-        const response = await fetch('https://viet-rentals-production.up.railway.app');
+const response = await fetch('https://viet-rentals-production.up.railway.app/listings/public');
         const data = await response.json();
         setHousings(Array.isArray(data) ? data : []);
       } catch (error) {
