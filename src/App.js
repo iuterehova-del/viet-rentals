@@ -10,6 +10,7 @@ function App() {
   const [housings, setHousings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 
   const texts = {
     ru: {
@@ -25,6 +26,12 @@ function App() {
       month: '/мес',
       sqm: 'м²',
       hello: 'Привет',
+      subscriptionTitle: 'Подписка на контакты',
+      subscriptionText: 'Получите доступ ко всем контактам риелторов на 1 месяц',
+      subscriptionPrice: '$5',
+      subscriptionButton: 'Оформить подписку',
+      closeButton: 'Закрыть',
+      subscriptionAlert: 'Скоро будет доступна оплата',
     },
     en: {
       title: '🏠 Vietnam Rentals',
@@ -39,6 +46,12 @@ function App() {
       month: '/mo',
       sqm: 'm²',
       hello: 'Hello',
+      subscriptionTitle: 'Contacts subscription',
+      subscriptionText: 'Get access to all realtor contacts for 1 month',
+      subscriptionPrice: '$5',
+      subscriptionButton: 'Subscribe',
+      closeButton: 'Close',
+      subscriptionAlert: 'Payment will be available soon',
     }
   };
 
@@ -82,23 +95,17 @@ const response = await fetch('https://viet-rentals-production.up.railway.app/lis
     return true;
   });
 
-  const handleContact = (phone, name) => {
-    if (WebApp.initDataUnsafe?.user) {
-      WebApp.showPopup({
-        title: t.contact,
-        message: `${name}\n📞 ${phone}`,
-        buttons: [
-          { id: 'call', type: 'default', text: '📞 Позвонить' },
-          { id: 'cancel', type: 'cancel' }
-        ]
-      }, (buttonId) => {
-        if (buttonId === 'call') {
-          window.open(`tel:${phone}`);
-        }
-      });
-    } else {
-      window.open(`tel:${phone}`);
-    }
+  const handleContact = () => {
+    setShowSubscriptionModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowSubscriptionModal(false);
+  };
+
+  const handleSubscribe = () => {
+    alert(t.subscriptionAlert);
+    setShowSubscriptionModal(false);
   };
 
   const handleSave = () => {
@@ -185,7 +192,7 @@ const response = await fetch('https://viet-rentals-production.up.railway.app/lis
                 <div className="card-actions">
                   <button
                     className="btn-contact"
-                    onClick={() => handleContact(h.phone, h.title)}
+                    onClick={() => handleContact()}
                   >
                     {t.contact}
                   </button>
@@ -198,6 +205,31 @@ const response = await fetch('https://viet-rentals-production.up.railway.app/lis
           ))
         )}
       </div>
+
+      {showSubscriptionModal && (
+        <div className="modal-overlay" onClick={handleCloseModal}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <button className="modal-close" onClick={handleCloseModal}>
+              ✕
+            </button>
+
+            <h2 className="modal-title">{t.subscriptionTitle}</h2>
+            
+            <p className="modal-text">{t.subscriptionText}</p>
+            
+            <div className="modal-price">{t.subscriptionPrice}</div>
+
+            <div className="modal-actions">
+              <button className="btn-subscribe" onClick={handleSubscribe}>
+                {t.subscriptionButton}
+              </button>
+              <button className="btn-close-modal" onClick={handleCloseModal}>
+                {t.closeButton}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
