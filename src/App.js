@@ -32,6 +32,7 @@ function App() {
       subscriptionButton: 'Оформить подписку',
       closeButton: 'Закрыть',
       subscriptionAlert: 'Скоро будет доступна оплата',
+      subscriptionRequest: 'Здравствуйте! Хочу оформить подписку на контакты ($5/месяц) в приложении аренды жилья во Вьетнаме.',
     },
     en: {
       title: '🏠 Vietnam Rentals',
@@ -52,6 +53,7 @@ function App() {
       subscriptionButton: 'Subscribe',
       closeButton: 'Close',
       subscriptionAlert: 'Payment will be available soon',
+      subscriptionRequest: 'Hello! I would like to subscribe to contacts ($5/month) in the Vietnam rentals app.',
     }
   };
 
@@ -104,7 +106,17 @@ const response = await fetch('https://viet-rentals-production.up.railway.app/lis
   };
 
   const handleSubscribe = () => {
-    alert(t.subscriptionAlert);
+    const requestText = t.subscriptionRequest;
+    const encodedText = encodeURIComponent(requestText);
+    const telegramUrl = `https://t.me/jhnmac?text=${encodedText}`;
+    
+    // Используем Telegram WebApp SDK если доступен
+    if (WebApp && WebApp.openLink) {
+      WebApp.openLink(telegramUrl);
+    } else {
+      window.open(telegramUrl, '_blank');
+    }
+    
     setShowSubscriptionModal(false);
   };
 
